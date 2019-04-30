@@ -116,6 +116,70 @@ void generateRegister(struct DogType *sample){
 	sample->deleted = false;
 	sample->index = 1;	//Aqui pues coloca un autoincremental
 }
+
+int writeRegister(void* ap ){
+	struct DogType* dato;
+	dato = ap;
+
+	FILE *f;
+
+	f = fopen("structures.dat", "a");
+	if(f == NULL){
+		perror("Could not create a file");
+		exit(-1);
+	}
+
+	int r = fwrite(dato, sizeof(struct DogType), 1, f);
+
+	if(r == 0){
+		perror("Could not write Struct");
+		exit(-1);
+	}
+
+	fclose(f);
+	return 0;
+}
+
+int findByIndex(void* ap, int index){
+	FILE* f;
+	struct DogType* datos;
+	f = fopen("structures.dat", "r");
+
+	if(f == NULL){
+		perror("Could not read a file");
+		exit(-1);
+	}
+
+	datos = ap;
+	fseek(f, index*sizeof(struct DogType), SEEK_SET);
+	int r =  fread(datos, sizeof(struct DogType), 1 , f);
+
+	if (r == 0){
+        perror("Could no read structure");
+        exit(-1);
+    }
+
+	printf("Name Read: %s\n", datos -> name);
+	fclose(f);
+	return 0;
+}
+int showAll(){
+		
+	FILE *f;
+	struct DogType datos;
+
+	f = fopen("structures.dat", "r");
+
+	if(f == NULL){
+		perror("Could not open a file");
+		exit(-1);
+	}
+	while(fread(&datos, sizeof(struct DogType), 1, f)){
+		printf("Name %s: \n", datos.name);
+	}
+	fclose(f); 
+	return 0;
+}
 	
 
 
