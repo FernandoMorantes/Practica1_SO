@@ -117,10 +117,16 @@ void generateRegister(struct DogType *sample){
 	sample->index = 1;	//Aqui pues coloca un autoincremental
 }
 
-int writeRegister(void* ap, FILE * f){
+int writeRegister(void* ap, int position){
 	struct DogType* dato;
 	dato = ap;
+	FILE* f;
+	f = fopen("structures.dat", "ab+");
 
+	if(f == NULL){
+		perror("Could not open a file");
+		exit(-1);
+	}
 	int r = fwrite(dato, sizeof(struct DogType), 1, f);
 
 	if(r == 0){
@@ -131,8 +137,14 @@ int writeRegister(void* ap, FILE * f){
 }
 
 ///
-int findByIndex(struct DogType* ap, int index, FILE* f){
+int findByIndex(struct DogType* ap, int index){
+	FILE* f;
+	f = fopen("structures.dat", "ab+");
 
+	if(f == NULL){
+		perror("Could not open a file");
+		exit(-1);
+	}
 	int d = fseek(f, index*sizeof(struct DogType), SEEK_SET);
 	if( d == -1){
 		printf("error al mover al index\n");
@@ -147,15 +159,22 @@ int findByIndex(struct DogType* ap, int index, FILE* f){
 	return 0;
 }
 
-int countRecords(FILE *cfPtr){
+int countRecords(){
+	FILE* f;
+	f = fopen("structures.dat", "ab+");
+
+	if(f == NULL){
+		perror("Could not open a file");
+		exit(-1);
+	}
     int r;
-    r = fseek(cfPtr,0*sizeof( struct DogType ), SEEK_SET);
+    r = fseek(f,0*sizeof( struct DogType ), SEEK_SET);
     if(r == -1){
 		printf("error al mover al index\n");
     }
     struct DogType perro={ "", "",  0, "", 0, 0.0, 'f', 0, 0 };
     int count =0;
-    while(fread(&perro, sizeof(struct DogType), 1, cfPtr )!=0){
+    while(fread(&perro, sizeof(struct DogType), 1, f )!=0){
         count++;
 		printf("name %s\n", perro.name);
     }
@@ -163,24 +182,27 @@ int countRecords(FILE *cfPtr){
 }
 	
 
-
+int registros;
 int main(int argc, char *argv[]) {
 	srand(time(NULL));
 	struct DogType* sampleRead;
 	sampleRead = malloc(sizeof(struct DogType));
 	struct DogType test = { "", "",  0, ' ', 0, 0.0, ' ', 0, 0 };
-	FILE* f;
-	f = fopen("structures.dat", "rb+");
-
-	if(f == NULL){
-		perror("Could not open a file");
-		exit(-1);
-	}
 	
-	int registros = countRecords(f);
+	registros = countRecords();
 	printf("Hay %d registros\n", registros);
-	int find = findByIndex( &test, 15, f);
+	int find = findByIndex( &test, 15);
 	
+	
+	for(int i = 0; i < 5; i++){
+		registros = countRecords();
+		struct DogType sample;
+		generateRegister(&sample);
+		int write = writeRegister(&sample, registros); 
+	}
+	registros = countRecords();
+	printf("Ahora hay %d registros\n", registros);
+	find = findByIndex( &test, 15);
 	free(sampleRead);
 	/*
 	para crear registros nuevos borrar archivo, cambiar rb+ a ab+ en fopen
