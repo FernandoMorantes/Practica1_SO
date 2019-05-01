@@ -121,8 +121,9 @@ int writeRegister(void* ap, int position){
 	struct DogType* dato;
 	dato = ap;
 	FILE* f;
-	f = fopen("structures.dat", "ab+");
 
+	f = fopen("structures.dat", "ab+");
+	int d = fseek(f, position*sizeof(struct DogType), SEEK_SET);
 	if(f == NULL){
 		perror("Could not open a file");
 		exit(-1);
@@ -186,12 +187,13 @@ int registros;
 int main(int argc, char *argv[]) {
 	srand(time(NULL));
 	struct DogType* sampleRead;
+	/*
 	sampleRead = malloc(sizeof(struct DogType));
 	struct DogType test = { "", "",  0, ' ', 0, 0.0, ' ', 0, 0 };
 	
 	registros = countRecords();
 	printf("Hay %d registros\n", registros);
-	int find = findByIndex( &test, 15);
+	int find = findByIndex( sampleRead, 15);
 	
 	
 	for(int i = 0; i < 5; i++){
@@ -202,14 +204,18 @@ int main(int argc, char *argv[]) {
 	}
 	registros = countRecords();
 	printf("Ahora hay %d registros\n", registros);
-	find = findByIndex( &test, 15);
+	find = findByIndex( sampleRead, 15);
+
 	free(sampleRead);
-	/*
-	para crear registros nuevos borrar archivo, cambiar rb+ a ab+ en fopen
-	for(int i = 0; i < 20; i++){
+	*/
+	
+	//para crear registros nuevos borrar archivo, cambiar rb+ a ab+ en fopen
+	registros = countRecords();
+	printf("Ahora hay %d registros\n", registros);
+	/*for(int i = 0; i < 500; i++){
 		struct DogType sample;
 		generateRegister(&sample);
-		int write = writeRegister(&sample, f); 
+		int write = writeRegister(&sample, registros); 
 	}
 	*/
 	return 0;
