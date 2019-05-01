@@ -85,7 +85,7 @@ void getRegBreed(struct DogType *sample, char type){
 
 void generateRegister(struct DogType *sample){
 	
-	srand(time(NULL));
+	
 	
 	int typeNumber = rand() % 2 + 1;
 	int ageNumber = rand() % 19;
@@ -116,24 +116,79 @@ void generateRegister(struct DogType *sample){
 	sample->deleted = false;
 	sample->index = 1;	//Aqui pues coloca un autoincremental
 }
+
+int writeRegister(void* ap, FILE * f){
+	struct DogType* dato;
+	dato = ap;
+
+	int r = fwrite(dato, sizeof(struct DogType), 1, f);
+
+	if(r == 0){
+		perror("Could not write Struct");
+		exit(-1);
+	}
+	return 0;
+}
+
+///
+int findByIndex(struct DogType* ap, int index, FILE* f){
+
+	int d = fseek(f, index*sizeof(struct DogType), SEEK_SET);
+	if( d == -1){
+		printf("error al mover al index\n");
+	}
+	int r =  fread(ap, sizeof(struct DogType), 1 , f);
+	if (r == 0){
+        perror("Could no read structure");
+        exit(-1);
+    }
+
+	printf("Name Read: %s\n", ap->name);
+	return 0;
+}
+
+int countRecords(FILE *cfPtr){
+    int r;
+    r = fseek(cfPtr,0*sizeof( struct DogType ), SEEK_SET);
+    if(r == -1){
+		printf("error al mover al index\n");
+    }
+    struct DogType perro={ "", "",  0, "", 0, 0.0, 'f', 0, 0 };
+    int count =0;
+    while(fread(&perro, sizeof(struct DogType), 1, cfPtr )!=0){
+        count++;
+		printf("name %s\n", perro.name);
+    }
+    return count;
+}
 	
 
 
 int main(int argc, char *argv[]) {
+	srand(time(NULL));
+	struct DogType* sampleRead;
+	sampleRead = malloc(sizeof(struct DogType));
+	struct DogType test = { "", "",  0, ' ', 0, 0.0, ' ', 0, 0 };
+	FILE* f;
+	f = fopen("structures.dat", "rb+");
+
+	if(f == NULL){
+		perror("Could not open a file");
+		exit(-1);
+	}
 	
-	struct DogType sample;
-	generateRegister(&sample);
+	int registros = countRecords(f);
+	printf("Hay %d registros\n", registros);
+	int find = findByIndex( &test, 15, f);
 	
-	printf( "Sample name : %s\n", sample.name);
-	printf( "Sample type : %s\n", sample.type);
-	printf( "Sample age : %d\n", sample.age);
-	printf( "Sample breed : %s\n", sample.breed);
-	printf( "Sample height : %d\n", sample.height);
-	printf( "Sample weight : %.2lf\n", sample.weight);
-	printf( "Sample sex : %c\n", sample.sex);
-	printf( "Sample deleted : %d\n", sample.deleted);
-	printf( "Sample index : %d\n", sample.index);
-	
-	
+	free(sampleRead);
+	/*
+	para crear registros nuevos borrar archivo, cambiar rb+ a ab+ en fopen
+	for(int i = 0; i < 20; i++){
+		struct DogType sample;
+		generateRegister(&sample);
+		int write = writeRegister(&sample, f); 
+	}
+	*/
 	return 0;
 }
