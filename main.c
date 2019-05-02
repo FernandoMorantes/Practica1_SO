@@ -3,10 +3,11 @@
 #include <string.h>
 #include <stdbool.h> 
 #include <math.h>
-
+#include <limits.h>
 
 int REGISTROS;
-int SIZE = 1010;
+int SIZE = 1999;
+int lastHashIndex[2000];
 
 struct DogType{
 	char name[32];
@@ -18,6 +19,7 @@ struct DogType{
 	char sex;
 	bool deleted;
 	int index;
+	int prevHashIndex;
 };
 
 int writeRegister(void *ap, int position){
@@ -44,22 +46,14 @@ int writeRegister(void *ap, int position){
 	return 0;
 }
 
-void findByIndex(struct DogType *ap, int index){
-	FILE *f;
-
+void findByIndex(struct DogType *ap, int index, FILE *f){
+	
 	struct DogType reg;
-	f = fopen("structures.dat", "rb+");
-
-	if (f == NULL)
-	{
-		perror("Could not open a file");
-		exit(-1);
-	}
 	int d = fseek(f, index * sizeof(struct DogType), SEEK_SET);
-	if (d == -1)
-	{
+	if (d == -1){
 		printf("error al mover al index\n");
 	}
+	
 	int r = fread(&reg, sizeof(struct DogType), 1, f);
 	if (r == 0)
 	{
@@ -77,30 +71,31 @@ void findByIndex(struct DogType *ap, int index){
 	ap->deleted = reg.deleted;
 	ap->index = reg.index;
 	ap->prevHashIndex = reg.prevHashIndex;
-
-	fclose(f);
 }
 
 int countRecords(){
-	FILE* f;
+	FILE *f;
 	f = fopen("structures.dat", "ab+");
 
-	if(f == NULL){
+	if (f == NULL)
+	{
 		perror("Could not open a file");
 		exit(-1);
 	}
-    int r;
-    r = fseek(f,0*sizeof( struct DogType ), SEEK_SET);
-    if(r == -1){
+	int r;
+	//r = fseek(f,0*sizeof( struct DogType ), SEEK_SET);
+	if (r == -1)
+	{
 		printf("error al mover al index\n");
-    }
-    struct DogType perro={ "", "",  0, "", 0, 0.0, 'f', 0, 0 };
-    int count =0;
-    while(fread(&perro, sizeof(struct DogType), 1, f )!=0){
-        count++;
-		printf("name %s\n", perro.name);
-    }
-    return count;
+	}
+	struct DogType perro = {"", "", 0, "", 0, 0.0, 'f', 0, 0};
+	int count = 0;
+	while (fread(&perro, sizeof(struct DogType), 1, f) != 0)
+	{
+		count++;
+	}
+	fclose(f);
+	return count;
 }
 
 unsigned int calculateHash (const char *word) {
@@ -113,6 +108,107 @@ unsigned int calculateHash (const char *word) {
     return hash % SIZE;
 }
 
+void writeHash(){
+	int status = remove("hash.dat");
+	if (status == 0)
+	{
+		printf("Hash file deleted\n");
+	}
+
+	FILE *f;
+	f = fopen("hash.dat", "ab+");
+
+	if (f == NULL)
+	{
+		perror("Could not open file");
+		exit(-1);
+	}
+
+	int r = fwrite(lastHashIndex, sizeof(lastHashIndex), 1, f);
+
+	if (r == 0)
+	{
+		perror("Could not write Struct");
+		exit(-1);
+	}
+	fclose(f);
+}
+
+void readHash(){
+
+	FILE *f;
+	f = fopen("hash.dat", "rb");
+	int d = fseek(f, 0 * sizeof(struct DogType), SEEK_SET);
+	if (d == -1)
+	{
+		printf("error al mover al index\n");
+	}
+	int test[2000];
+
+	if (f == NULL)
+	{
+		perror("Could not open file");
+		exit(-1);
+	}
+
+	int r = fread(test, sizeof(test), 1, f);
+
+	if (r == 0)
+	{
+		perror("Could not read Struct hash");
+		exit(-1);
+	}
+
+	for (int i = 0; i < 2000; i++){
+		lastHashIndex[i] = test[i];
+		printf(" %d", test[i]);
+	}
+
+	fclose(f);
+}
+
 int main(){
 
+	//readHash();
+
+	FILE *f;
+	f = fopen("structures.dat", "rb+");
+
+	if (f == NULL){
+		perror("Could not open a file");
+		exit(-1);
+	}
+
+	struct DogType test;
+
+	findByIndex(&test, 9000, f);
+
+	printf("\n\ntest ->");
+	printf("\nname: %s\n", test.name);
+	printf("type: %s\n", test.type);
+	printf("age: %d\n", test.age);
+	printf("breed: %s\n", test.breed);
+	printf("height: %d\n", test.height);
+	printf("weight: %.2lf\n", test.weight);
+	printf("sex: %c\n", test.sex);
+	printf("index: %d\n", test.index);
+	printf("prev hash index: %d\n\n", test.prevHashIndex);
+
+	findByIndex(&test, 8000, f);
+
+	printf("\n\ntest ->");
+	printf("\nname: %s\n", test.name);
+	printf("type: %s\n", test.type);
+	printf("age: %d\n", test.age);
+	printf("breed: %s\n", test.breed);
+	printf("height: %d\n", test.height);
+	printf("weight: %.2lf\n", test.weight);
+	printf("sex: %c\n", test.sex);
+	printf("index: %d\n", test.index);
+	printf("prev hash index: %d\n\n", test.prevHashIndex);
+
+	printf("\nHay %d registros\n", countRecords());
+
+	fclose(f);
+	return 0;
 }
