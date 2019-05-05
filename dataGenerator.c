@@ -11,15 +11,16 @@ struct DogType{
 	int age;
 	char breed[16];
 	int height;
-	double weight;
+	float weight;
 	char sex;
 	bool deleted;
 	int index;
 	int prevHashIndex;
+	int medicalHistoryID;
 };
 
 char types[2][32] = {"Dog", "Cat"};
-char sexes[2] = {'M', 'F'};
+char sexes[2] = {'H', 'M'};
 
 char dogBreed[10][32] = {"Alano", "Alaskan Malamute", "Boxer", "Bull Terrier ", "Chihuahua", "Chow Chow", "Samoyedo", "Pitbull", "Siberian Husky", "Dalmata"};
 char catBreed[10][32] = {"Angora turco", "Bombay", "Himalayo", "Mau egipcio", "Serengeti", "Van Turco", "Khao Manee", "Chartreux", "Cymric", "Devon rex"};
@@ -60,12 +61,12 @@ void generateRegister(struct DogType *sample, int currentIndex){
 		strcpy(sample->breed, catBreed[(rand() % 9)]);
 	}
 
-	double weightNumber;
+	float weightNumber;
 	if(typeNumber == 1){
-		weightNumber = 4.0 + ((double)rand() / RAND_MAX)*(60.0-4.0);
+		weightNumber = 4.0 + ((float)rand() / RAND_MAX)*(60.0-4.0);
 		sample->height = rand() % 120 + 20;
 	}else{
-		weightNumber = 3.5 + ((double)rand() / RAND_MAX)*(19.0-3.5);
+		weightNumber = 3.5 + ((float)rand() / RAND_MAX)*(19.0-3.5);
 		sample->height = rand() % 45 + 10;
 	}
 
@@ -80,6 +81,7 @@ void generateRegister(struct DogType *sample, int currentIndex){
 
 	sample->prevHashIndex = lastHashIndex[hash];
 	lastHashIndex[hash] = currentIndex;
+	sample->medicalHistoryID = -1;
 }
 
 int writeRegisterToCreate(void* ap, FILE* f, int index){
@@ -103,7 +105,7 @@ void findByIndex(struct DogType *ap, int index){
 	FILE* f;
 
 	struct DogType reg;
-	f = fopen("structures.dat", "rb+");
+	f = fopen("dataDogs.dat", "rb+");
 
 	if(f == NULL){
 		perror("Could not open a file");
@@ -135,7 +137,7 @@ void findByIndex(struct DogType *ap, int index){
 
 int countRecords(){
 	FILE* f;
-	f = fopen("structures.dat", "ab+");
+	f = fopen("dataDogs.dat", "ab+");
 
 	if(f == NULL){
 		perror("Could not open a file");
@@ -213,7 +215,7 @@ int main(int argc, char *argv[]) {
 
 	srand(time(NULL));
 
-	int status = remove("structures.dat");
+	int status = remove("dataDogs.dat");
 	if(status == 0 ){
 		printf("Structures file deleted\n");
 	}
@@ -223,7 +225,7 @@ int main(int argc, char *argv[]) {
 	}
 
 	FILE* f;
-	f = fopen("structures.dat", "w+");
+	f = fopen("dataDogs.dat", "ab+");
 	if(f == NULL){
 		perror("Could not open a file");
 		exit(-1);
@@ -239,11 +241,11 @@ int main(int argc, char *argv[]) {
 	fclose(f);
 
 	writeHash();
-	readHash();
+	//readHash();
 	
 	struct DogType test;
 
-	findByIndex(&test, 9000);
+	findByIndex(&test, 9999999);
 
 	printf("\n\ntest ->");
 	printf("\nname: %s\n", test.name);
@@ -251,11 +253,11 @@ int main(int argc, char *argv[]) {
 	printf("age: %d\n", test.age);
 	printf("breed: %s\n", test.breed);
 	printf("height: %d\n", test.height);
-	printf("weight: %.2lf\n", test.weight);
+	printf("weight: %.2f\n", test.weight);
 	printf("sex: %c\n", test.sex);
 	printf("index: %d\n", test.index);
 	printf("prev hash index: %d\n\n", test.prevHashIndex);
-	printf("\nHay %d registros\n", countRecords());
+	//printf("\nHay %d registros\n", countRecords());
 	/*
 	//PARA HACER DEBUGG
 
